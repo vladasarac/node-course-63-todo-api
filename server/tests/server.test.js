@@ -10,7 +10,9 @@ beforeEach((done) => {
   });
 });
 
+//testiranje rute POST /todos za upis novog todo-a u collecion todos
 describe('POST /todos', () => {
+  //ako je dobar request, treba da kreira novi todo i vrati status 200	
   it('should create new todo', (done) => {
     var text = 'test todo text';
     request(app)
@@ -31,6 +33,7 @@ describe('POST /todos', () => {
       	}).catch((e) => done(e));
       });
   });
+  //ako je los tj prazan request treba da vrati status 400
   it('should not create todo with invalid body data', (done) => {
   	request(app)
   	  .post('/todos')

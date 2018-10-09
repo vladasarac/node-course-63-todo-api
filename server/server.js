@@ -28,6 +28,17 @@ app.post('/todos', (req, res) => {
     });
 });
 
+//vadjenje svih todo-a iz baze
+app.get('/todos', (req, res) => {
+  Todo.find()
+    .then((todos) => {
+      res.send({todos})  
+    }, (e) =>{
+      //ako baza vrati error tj ne izvadi nista iz baze
+      res.status(400).send(e);
+    });
+});
+
 
 //start the server
 app.listen(3000, () => {
