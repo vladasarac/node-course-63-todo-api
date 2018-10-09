@@ -30,6 +30,7 @@ app.post('/todos', (req, res) => {
 
 //vadjenje svih todo-a iz baze
 app.get('/todos', (req, res) => {
+  //vadimo sve iz todos kolekcije
   Todo.find()
     .then((todos) => {
       res.send({todos})  
