@@ -7,6 +7,7 @@ var {Todo} = require('./models/todo');//uvozimo model Todo u variablu Todo iz fa
 var {User} = require('./models/user');//uvozimo model User u variablu User iz fajla /models/user.js
  
 var app = express();
+const port = process.env.PORT || 3000;
 
 //
 app.use(bodyParser.json());
@@ -62,8 +63,8 @@ app.get('/todos/:id', (req, res) => {
 
 
 //start the server
-app.listen(3000, () => {
-  console.log('Started on port 3000');
+app.listen(port, () => {
+  console.log(`Started on port ${port}`);
 });
 
 //izvozimo app zbog testiranja
