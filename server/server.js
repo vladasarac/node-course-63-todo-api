@@ -1,6 +1,7 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-var {ObjectID} = require('mongodb');//uvzimo ObjectID, da bi mogli da radimo validaciju pristiglog id-a
+const _ = require('lodash');
+const express = require('express');
+const bodyParser = require('body-parser');
+const {ObjectID} = require('mongodb');//uvzimo ObjectID, da bi mogli da radimo validaciju pristiglog id-a
 
 var {mongoose} = require('./db/mongoose.js');//uvozimo mongoose variablu iz fajla db/mongoose.js tj vez sa bazom
 var {Todo} = require('./models/todo');//uvozimo model Todo u variablu Todo iz fajla /models/todo.js
@@ -11,6 +12,8 @@ const port = process.env.PORT || 3000;
 
 //
 app.use(bodyParser.json());
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
 
 //pravljenje novog todo-a kad stigne request iz postmana
 app.post('/todos', (req, res) => {
@@ -30,6 +33,8 @@ app.post('/todos', (req, res) => {
     });
 });
 
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
 //vadjenje svih todo-a iz baze
 app.get('/todos', (req, res) => {
   //vadimo sve iz todos kolekcije
@@ -41,6 +46,8 @@ app.get('/todos', (req, res) => {
       res.status(400).send(e);
     });
 });
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
 
 //vadjenje jednog todoa
 app.get('/todos/:id', (req, res) => {
@@ -61,7 +68,9 @@ app.get('/todos/:id', (req, res) => {
     });
 });
 
-//risanje todo-a po id-u
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+//brisanje todo-a po id-u
 app.delete('/todos/:id', (req, res) => {
   var id = req.params.id;//uzimamo pristigli id iz URL-a
   if(!ObjectID.isValid(id)){//validacija id(proverava da li je pristigli id validan MongoDB id)
@@ -79,16 +88,50 @@ app.delete('/todos/:id', (req, res) => {
     });
 });
 
+//-------------------------------------------------------------------------------------------------------------------------------------------------
 
+//PATCH ruta za upate todo-a
+app.patch('/todos/:id', (req, res) => {
+  var id = req.params.id;//uzimamo pristigli id iz URL-a
+  //od req objekta pravimo objekat body koji ima samo propertye text i completed, posto samo to user moze da updateuje
+  var body = _.pick(req.body, ['text', 'completed']);
+  if(!ObjectID.isValid(id)){//validacija id(proverava da li je pristigli id validan MongoDB id)
+    return res.status(404).send();//ako id nije validan saljemo 404
+  }
+  //ako ima u body-u completed element i ako je boolean(tj user je komepkletirao todo)
+  if(_.isBoolean(body.completed) && body.completed){
+    body.completed_at = new Date().getTime();//pravimo kompletedAt kolonu i u njoj trenutno vreme
+    console.log('body', body);
+  }else{//ako nije stigao body.completed pravimo kolonu completed i vrednost false i kolonu completedAt i vrednos null
+    body.completed = false;
+    body.completed_at = null;
+  }
+  //updateujemo todo collection po id koloni, argument new: true, znaci da hocemo da nam funkcija vrati novi updateovani todo
+  Todo.findByIdAndUpdate(id, { $set: body }, { new: true })
+    .then((todo) => {
+      if(!todo){//ako ne nadje todo za update po stiglom id-u 
+        return res.status(404).send();
+      }
+      res.send({todo});//ako uradi update
+    })
+    .catch((e) => {//ako je neki error
+      res.status(404).send();
+    });
+});
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
 
 //start the server
 app.listen(port, () => {
   console.log(`Started on port ${port}`);
 });
 
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
 //izvozimo app zbog testiranja
 module.exports = {app};
 
+//-------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
