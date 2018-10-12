@@ -61,6 +61,25 @@ app.get('/todos/:id', (req, res) => {
     });
 });
 
+//risanje todo-a po id-u
+app.delete('/todos/:id', (req, res) => {
+  var id = req.params.id;//uzimamo pristigli id iz URL-a
+  if(!ObjectID.isValid(id)){//validacija id(proverava da li je pristigli id validan MongoDB id)
+    return res.status(404).send();//ako id nije validan saljemo 404
+  }
+  Todo.findByIdAndRemove(id)
+    .then((todo) => {
+      if(!todo){//ako nema reda u bazi sa tim id-em
+       return res.status(404).send();
+      }
+      res.send({todo});//ako nadjemo todo u bazi i obrisemo ga saljemo ga klijentu
+    })
+    .catch((e) => {
+      res.status(400).send();
+    });
+});
+
+
 
 //start the server
 app.listen(port, () => {
