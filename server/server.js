@@ -1,3 +1,4 @@
+require('./config/config.js');//fajl u kom je konfiguracija enviroment variabli
 const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -8,7 +9,7 @@ var {Todo} = require('./models/todo');//uvozimo model Todo u variablu Todo iz fa
 var {User} = require('./models/user');//uvozimo model User u variablu User iz fajla /models/user.js
  
 var app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 
 //
 app.use(bodyParser.json());
