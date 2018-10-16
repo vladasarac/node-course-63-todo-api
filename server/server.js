@@ -15,6 +15,8 @@ const port = process.env.PORT;
 app.use(bodyParser.json());
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------
+// Todo Rute
+//-------------------------------------------------------------------------------------------------------------------------------------------------
 
 //pravljenje novog todo-a kad stigne request iz postmana
 app.post('/todos', (req, res) => {
@@ -94,7 +96,7 @@ app.delete('/todos/:id', (req, res) => {
 //PATCH ruta za upate todo-a
 app.patch('/todos/:id', (req, res) => {
   var id = req.params.id;//uzimamo pristigli id iz URL-a
-  //od req objekta pravimo objekat body koji ima samo propertye text i completed, posto samo to user moze da updateuje
+  //koristeci lodash-ov pick  metod od req objekta pravimo objekat body koji ima samo propertye text i completed, posto samo to user moze da updateuje
   var body = _.pick(req.body, ['text', 'completed']);
   if(!ObjectID.isValid(id)){//validacija id(proverava da li je pristigli id validan MongoDB id)
     return res.status(404).send();//ako id nije validan saljemo 404
@@ -117,6 +119,29 @@ app.patch('/todos/:id', (req, res) => {
     })
     .catch((e) => {//ako je neki error
       res.status(404).send();
+    });
+});
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+// User Rute
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+//ruta za pravljenje novog usera
+app.post('/users', (req, res) => {
+  //koristeci lodash-ov pick  metod od req objekta pravimo objekat body koji ima samo propertye email i password
+  var body = _.pick(req.body, ['email', 'password']);
+  var user = new User(body);//pravimo novog usera, tj instancu modela User i dajemo mu body kao argument da popuni kolone email i password
+  //cuvamo u bazi
+  user.save()
+    .then(() => {
+      return user.generateAuthToken();//pozivamo metod generateAuthToken() user modela da napravi token
+      // res.send(user);
+    })
+    .then((token) => {
+      res.header('x-auth', token).send(user);
+    })
+    .catch((e) => {
+      res.status(400).send(e);
     });
 });
 
