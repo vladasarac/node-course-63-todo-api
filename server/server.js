@@ -7,6 +7,7 @@ const {ObjectID} = require('mongodb');//uvzimo ObjectID, da bi mogli da radimo v
 var {mongoose} = require('./db/mongoose.js');//uvozimo mongoose variablu iz fajla db/mongoose.js tj vez sa bazom
 var {Todo} = require('./models/todo');//uvozimo model Todo u variablu Todo iz fajla /models/todo.js
 var {User} = require('./models/user');//uvozimo model User u variablu User iz fajla /models/user.js
+var {authenticate} = require('./middleware/authenticate');//uvozimo middleware authenticate
  
 var app = express();
 const port = process.env.PORT;
@@ -144,6 +145,13 @@ app.post('/users', (req, res) => {
       res.status(400).send(e);
     });
 });
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+//ruta vadi trenutno ulogovanog usera(valjda, tako nesto....)
+app.get('/users/me', authenticate, (req, res) => {
+  res.send(req.user);
+});  
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 
