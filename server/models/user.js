@@ -2,6 +2,7 @@ const  mongoose = require('mongoose');//uvozimo paket mongoose za rad sa mongoDB
 const validator = require('validator');//paket validator koji cemo koristiti da verifikujemo da li je email validan
 const jwt = require('jsonwebtoken');//paket jesonwebtoken za pravljenje tokena
 const _ = require('lodash');//paket lodash
+const bcrypt = require('bcryptjs');//paket cryptjs za sifriranje passworda
 
 //model za User collection
 var UserSchema = new mongoose.Schema({
@@ -64,11 +65,26 @@ UserSchema.statics.findByToken = function(token){
   	decoded = jwt.verify(token, 'abc123');
   }catch(e){
   	return new Promise((resolve, reject) => {
- 	  reject();
+ 	    reject();
   	});
   }
   return User.findOne({ '_id': decoded._id, 'tokens.token': token, 'tokens.access': 'auth' });
 };
+
+//mongoose-ov middleware koji se poziva re save-a
+UserSchema.pre('save', function(next){
+  var user = this;
+  if(user.isModified('password')){
+    bcrypt.genSalt(10, (err, salt) => {
+      bcrypt.hash(user.password, salt, (err, hash) => {
+        user.password = hash;
+        next();
+      });
+    });
+  }else{
+    next();
+  }
+});
 
 var User = mongoose.model('User', UserSchema);
 
