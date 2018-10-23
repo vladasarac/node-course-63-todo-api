@@ -151,7 +151,25 @@ app.post('/users', (req, res) => {
 //ruta vadi trenutno ulogovanog usera(valjda, tako nesto....)
 app.get('/users/me', authenticate, (req, res) => {
   res.send(req.user);
-});  
+});
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+//ruta za login
+app.post('/users/login', (req, res) => {
+  var body = _.pick(req.body, ['email', 'password']);
+  User.findByCredentials(body.email, body.password)
+    .then((user) => {
+      return user.generateAuthToken()
+        .then((token) => {
+          res.header('x-auth', token).send(user);
+        });
+      res.send(user);
+    })
+    .catch((e) => {
+      res.status(400).send();
+    });
+});
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 
